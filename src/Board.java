@@ -1,40 +1,65 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-
+import java.awt.event.MouseListener;
 
 import java.util.Random;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 
-public class Board extends JPanel implements ActionListener{
+public class Board extends JPanel implements MouseListener{
 
     private int totalMines, totalSquares;
     private Square[][] squares;
     private Dimension boardSize;
 
-    private JLabel statusBar;
+    private Color LIGHTBLUE = new Color(46, 171, 228);
+    private Color DARKGREEN = new Color (0, 100, 0);
 
-    Color LIGHTBLUE = new Color(46, 171, 228);
-    Color DARKGREEN = new Color (0, 100, 0);
     public Board(){
-        this.statusBar = statusBar;
         boardSize = new Dimension(9,9);
-
         newGame();
 
         setVisible(true);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        showSquare((Square)(e.getSource()));
+    public void mouseEntered(MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    public void mouseClicked(MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    public void mousePressed(MouseEvent e) {
+        Square clicked = (Square)e.getSource();
+        if (SwingUtilities.isLeftMouseButton(e)){
+            if (!clicked.isFlag()){
+                showSquare(clicked);
+            }
+        }
+        if (SwingUtilities.isRightMouseButton(e)){
+            clicked.setFlag();
+            clicked.setEnabled(!clicked.isFlag());
+            if (clicked.isFlag()){
+                ((Square)e.getSource()).setText("F");
+            }
+            else{
+                ((Square)e.getSource()).setText("");
+            }
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // TODO Auto-generated method stub
     }
 
     private void newGame(){
@@ -46,8 +71,9 @@ public class Board extends JPanel implements ActionListener{
         for (int row = 0; row < boardSize.height; row++){
             for (int col = 0; col < boardSize.width; col++){
                 squares[row][col] = new Square(row, col);
-                squares[row][col].addActionListener(this);
+                squares[row][col].addMouseListener(this);
                 squares[row][col].setFocusable(false);
+                //squares[row][col].setFont(new Font("Helvetica", Font.PLAIN, 20));
                 add(squares[row][col]);
             }
         }
@@ -59,7 +85,7 @@ public class Board extends JPanel implements ActionListener{
         int mines = 0;
         Random rand = new Random();
 
-        do{
+        do {
             int row = rand.nextInt(8) + 1;
             int col = rand.nextInt(8) + 1;
 
@@ -76,27 +102,26 @@ public class Board extends JPanel implements ActionListener{
                             continue;
                         if (!squares[i][j].isMine()){
                             squares[i][j].addMines();
-                            // squares[i][j].setText(Integer.toString(squares[i][j].getNeighbours()));
                         }
                     }
                 }
-                // squares[row][col].setText("X");
                 mines++;
             }
         }
         while (mines < totalMines);
     }
 
-    private void gameOver() {
+    private void gameOver(){
         String message;
-        if (totalSquares != totalMines) {
+        if (totalSquares != totalMines){
             for (int row = 0; row < boardSize.height; row++)
                 for (int col = 0; col < boardSize.width; col++)
                     if (squares[row][col].isMine())
                         squares[row][col].setText("M");
 
             message = "You lost.";
-        } else {
+        }
+        else{
             message = "You won!";
         }
 
@@ -106,24 +131,22 @@ public class Board extends JPanel implements ActionListener{
         int result = JOptionPane.showOptionDialog(this, message, "End of Game",
                 JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
 
-        if (result == JOptionPane.YES_OPTION) {
+        if (result == JOptionPane.YES_OPTION){
             removeAll();
             newGame();
             revalidate();
             repaint();
-
         }
-        else
+        else {
             System.exit(0);
-
+        }
     }
 
     private void showSquare(Square square){
         square.setEnabled(false);
-        //System.out.println(square.getRow());
-        //System.out.println(square.getCol());
 
-        if (!square.isMine()) {
+        if (!square.isMine()){
+            square.removeMouseListener(this);
             if (square.getNeighbours() == 0)
                 showNeighbours(square);
             else {
@@ -143,21 +166,19 @@ public class Board extends JPanel implements ActionListener{
                     default:
                         break;
                 }
-
-                square.setFont(new Font("Helvetica", Font.PLAIN, 20));
                 square.setText(Integer.toString(neighbours));
             }
         }
-        else
+        else {
             gameOver();
+        }
 
         totalSquares--;
         if (totalSquares == totalMines)
             gameOver();
-
     }
 
-    public void showNeighbours(Square square){
+    private void showNeighbours(Square square){
         int row = square.getRow();
         int col = square.getCol();
 
@@ -173,5 +194,4 @@ public class Board extends JPanel implements ActionListener{
             }
         }
     }
-
 }

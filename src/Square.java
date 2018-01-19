@@ -18,7 +18,6 @@ public class Square extends JButton{
         this.flag = false;
 
         this.nMines = 0;
-
     }
 
     public void setMine(){
@@ -45,9 +44,11 @@ public class Square extends JButton{
         return col;
     }
 
-    public void setFlag(boolean flag){
-        this.flag = flag;
+    public void setFlag(){
+        flag = !flag;
     }
 
-
+    public boolean isFlag(){
+        return flag;
+    }
 }
